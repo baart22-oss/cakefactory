@@ -35,10 +35,18 @@ router.post('/register', async (req, res) => {
     if (username.length < 3 || username.length > 50) {
       return res.status(400).json({ error: 'Username must be 3-50 characters' });
     }
-    // Simple linear-time email format check (no backtracking risk)
+    // Linear-time email validation (no backtracking risk)
     const atIdx = email.indexOf('@');
+    const lastAtIdx = email.lastIndexOf('@');
     const dotIdx = email.lastIndexOf('.');
-    if (atIdx < 1 || dotIdx <= atIdx + 1 || dotIdx >= email.length - 1 || email.includes(' ')) {
+    if (
+      atIdx < 1 ||
+      atIdx !== lastAtIdx ||              // no multiple @ symbols
+      dotIdx <= atIdx + 1 ||             // dot must be after @
+      dotIdx >= email.length - 1 ||      // must have TLD chars after dot
+      email.includes(' ') ||
+      email.length > 254                 // RFC 5321 max length
+    ) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
     if (password.length < 6) {
