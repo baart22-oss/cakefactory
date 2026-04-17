@@ -35,7 +35,10 @@ router.post('/register', async (req, res) => {
     if (username.length < 3 || username.length > 50) {
       return res.status(400).json({ error: 'Username must be 3-50 characters' });
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    // Simple linear-time email format check (no backtracking risk)
+    const atIdx = email.indexOf('@');
+    const dotIdx = email.lastIndexOf('.');
+    if (atIdx < 1 || dotIdx <= atIdx + 1 || dotIdx >= email.length - 1 || email.includes(' ')) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
     if (password.length < 6) {
