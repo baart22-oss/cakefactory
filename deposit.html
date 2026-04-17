@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deposit — CakeFactory</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="navbar-brand">🎂 Cake<span>Factory</span></a>
+    <ul class="navbar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="game.html">Play Game</a></li>
+      <li><a href="deposit.html" class="active">Deposit</a></li>
+      <li><a href="withdrawal.html">Withdraw</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="navbar-user">
+        <span id="navUsername">Loading...</span>
+        <span class="wallet-display" id="navWallet">R 0.00</span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding-top:2rem;padding-bottom:3rem;">
+  <div style="margin-bottom:2rem;">
+    <h1 style="font-size:1.75rem;">💳 Deposit Funds</h1>
+    <p style="color:var(--text-muted);">Choose your investment plan and send your EFT payment.</p>
+  </div>
+
+  <!-- Investment Plans -->
+  <div style="margin-bottom:2rem;">
+    <h3 style="margin-bottom:1rem;">Choose Your Investment Tier</h3>
+    <div class="grid-4" id="tierGrid">
+      <div class="tier-card cupcake" onclick="selectTier(this,'cupcake','Cupcake',100,499,1)" style="cursor:pointer;">
+        <span class="tier-emoji">🧁</span>
+        <div class="tier-name">Cupcake</div>
+        <div class="tier-range">R100 – R499</div>
+        <div class="tier-roi">1%</div>
+        <div class="tier-roi-label">Daily ROI</div>
+      </div>
+      <div class="tier-card layer-cake" onclick="selectTier(this,'layer-cake','Layer Cake',500,1999,1.5)" style="cursor:pointer;">
+        <span class="tier-emoji">🎂</span>
+        <div class="tier-name">Layer Cake</div>
+        <div class="tier-range">R500 – R1,999</div>
+        <div class="tier-roi">1.5%</div>
+        <div class="tier-roi-label">Daily ROI</div>
+      </div>
+      <div class="tier-card wedding-cake" onclick="selectTier(this,'wedding-cake','Wedding Cake',2000,4999,2)" style="cursor:pointer;">
+        <span class="tier-emoji">💒</span>
+        <div class="tier-name">Wedding Cake</div>
+        <div class="tier-range">R2,000 – R4,999</div>
+        <div class="tier-roi">2%</div>
+        <div class="tier-roi-label">Daily ROI</div>
+      </div>
+      <div class="tier-card master-baker" onclick="selectTier(this,'master-baker','Master Baker',5000,999999,3)" style="cursor:pointer;">
+        <span class="tier-emoji">👑</span>
+        <div class="tier-name">Master Baker</div>
+        <div class="tier-range">R5,000+</div>
+        <div class="tier-roi">3%</div>
+        <div class="tier-roi-label">Daily ROI</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+    <!-- Banking Details -->
+    <div class="card">
+      <div class="card-header"><h4>🏦 EFT Banking Details</h4></div>
+      <div class="card-body">
+        <div class="bank-info-box">
+          <div class="bank-info-row">
+            <span class="bank-info-label">Beneficiary</span>
+            <span class="bank-info-value">E Roos</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Bank</span>
+            <span class="bank-info-value">ABSA</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Account Number</span>
+            <span class="bank-info-value">9191004857</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Branch Code</span>
+            <span class="bank-info-value">632005</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">Reference</span>
+            <span class="bank-info-value" style="color:var(--primary);">Your email address</span>
+          </div>
+        </div>
+        <div class="alert alert-warning mt-2">
+          <span>⚠️</span>
+          <span>Use your email address as the payment reference so we can identify your payment.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit Proof -->
+    <div class="card">
+      <div class="card-header"><h4>📤 Submit Proof of Payment</h4></div>
+      <div class="card-body">
+        <div id="depositError" class="alert alert-danger hidden"></div>
+        <div id="depositSuccess" class="alert alert-success hidden"></div>
+        <form id="depositForm" onsubmit="submitDeposit(event)">
+          <div class="form-group">
+            <label class="form-label">Selected Tier</label>
+            <input type="text" class="form-control" id="selectedTierDisplay" placeholder="Click a tier above to select" readonly style="background:var(--bg);" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount Deposited (R)</label>
+            <input type="number" class="form-control" id="depositAmount" placeholder="e.g. 500" min="100" step="0.01" required />
+            <div class="form-hint" id="amountHint">Select a tier first</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Proof of Payment</label>
+            <div class="file-upload-area" id="uploadArea" onclick="document.getElementById('proofFile').click()">
+              <span class="upload-icon">📎</span>
+              <p style="font-size:0.9rem;color:var(--text-muted);">Click to upload proof of payment</p>
+              <p style="font-size:0.75rem;color:var(--text-muted);">JPG, PNG or PDF — max 5MB</p>
+            </div>
+            <input type="file" id="proofFile" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(this)" />
+            <div id="filePreview" style="margin-top:0.75rem;display:none;">
+              <div style="display:flex;align-items:center;gap:0.75rem;background:var(--bg);padding:0.6rem;border-radius:var(--radius-sm);border:1px solid var(--border);">
+                <span style="font-size:1.5rem;" id="fileIcon">📄</span>
+                <div>
+                  <div style="font-size:0.85rem;font-weight:600;" id="fileName">-</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);" id="fileSize">-</div>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" style="margin-left:auto;" onclick="clearFile()">✕</button>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="depositBtn">Submit Deposit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">© 2025 CakeFactory. Build Cakes. Earn Returns.</div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/deposit.js"></script>
+</body>
+</html>

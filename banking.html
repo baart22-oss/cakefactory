@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Details — CakeFactory</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <a href="dashboard.html" class="navbar-brand">🎂 Cake<span>Factory</span></a>
+    <ul class="navbar-nav">
+      <li><a href="dashboard.html">Dashboard</a></li>
+      <li><a href="game.html">Play Game</a></li>
+      <li><a href="deposit.html">Deposit</a></li>
+      <li><a href="withdrawal.html">Withdraw</a></li>
+    </ul>
+    <div class="navbar-actions">
+      <div class="navbar-user">
+        <span id="navUsername">Loading...</span>
+        <span class="wallet-display" id="navWallet">R 0.00</span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="max-width:600px;padding-top:2rem;padding-bottom:3rem;">
+  <div style="margin-bottom:2rem;">
+    <h1 style="font-size:1.75rem;">🏦 Banking Details</h1>
+    <p style="color:var(--text-muted);">Save your banking details for withdrawals. Required before you can withdraw.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h4>Bank Account Information</h4></div>
+    <div class="card-body">
+      <div id="bankError" class="alert alert-danger hidden"></div>
+      <div id="bankSuccess" class="alert alert-success hidden"></div>
+
+      <form id="bankingForm" onsubmit="saveBanking(event)">
+        <!-- Section 1: Account Holder -->
+        <div style="border-left:4px solid var(--primary);padding-left:1rem;margin-bottom:1.5rem;">
+          <h5 style="margin-bottom:1rem;color:var(--dark);">Section 1 — Account Holder</h5>
+          <div class="form-group">
+            <label class="form-label">Full Name (as on bank account)</label>
+            <input type="text" class="form-control" id="accountHolder" placeholder="e.g. Jane Smith" required />
+          </div>
+        </div>
+
+        <!-- Section 2: Bank Name -->
+        <div style="border-left:4px solid var(--accent);padding-left:1rem;margin-bottom:1.5rem;">
+          <h5 style="margin-bottom:1rem;color:var(--dark);">Section 2 — Bank Name</h5>
+          <div class="form-group">
+            <label class="form-label">Select Your Bank</label>
+            <select class="form-control" id="bankName" required>
+              <option value="">-- Select a bank --</option>
+              <option value="FNB">FNB (First National Bank)</option>
+              <option value="ABSA">ABSA</option>
+              <option value="Standard Bank">Standard Bank</option>
+              <option value="Nedbank">Nedbank</option>
+              <option value="Capitec">Capitec Bank</option>
+              <option value="TymeBank">TymeBank</option>
+              <option value="African Bank">African Bank</option>
+              <option value="Bidvest">Bidvest Bank</option>
+              <option value="Discovery Bank">Discovery Bank</option>
+              <option value="Investec">Investec</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section 3: Account Number -->
+        <div style="border-left:4px solid var(--success);padding-left:1rem;margin-bottom:1.5rem;">
+          <h5 style="margin-bottom:1rem;color:var(--dark);">Section 3 — Account Number</h5>
+          <div class="form-group">
+            <label class="form-label">Account Number</label>
+            <input type="text" class="form-control" id="accountNumber" placeholder="e.g. 1234567890" inputmode="numeric" pattern="[0-9]+" required />
+            <div class="form-hint">Numbers only, no spaces or dashes</div>
+          </div>
+        </div>
+
+        <!-- Section 4: Branch Code -->
+        <div style="border-left:4px solid var(--info);padding-left:1rem;margin-bottom:1.5rem;">
+          <h5 style="margin-bottom:1rem;color:var(--dark);">Section 4 — Branch Code</h5>
+          <div class="form-group">
+            <label class="form-label">Branch Code</label>
+            <input type="text" class="form-control" id="branchCode" placeholder="e.g. 250655" required />
+            <div class="form-hint">Standard branch codes: FNB 250655, ABSA 632005, Standard 051001, Nedbank 198765, Capitec 470010</div>
+          </div>
+        </div>
+
+        <!-- Section 5: Account Type -->
+        <div style="border-left:4px solid var(--warning);padding-left:1rem;margin-bottom:1.5rem;">
+          <h5 style="margin-bottom:1rem;color:var(--dark);">Section 5 — Account Type</h5>
+          <div class="form-group">
+            <label class="form-label">Account Type</label>
+            <select class="form-control" id="accountType" required>
+              <option value="">-- Select account type --</option>
+              <option value="Cheque">Cheque Account</option>
+              <option value="Savings">Savings Account</option>
+              <option value="Transmission">Transmission Account</option>
+              <option value="Current">Current Account</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;">
+          <button type="submit" class="btn btn-primary btn-lg" id="saveBtn" style="flex:1;">💾 Save Banking Details</button>
+          <a href="dashboard.html" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="alert alert-info mt-2">
+    <span>🔒</span>
+    <span>Your banking details are securely stored and only used for processing withdrawals.</span>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">© 2025 CakeFactory. Build Cakes. Earn Returns.</div>
+</footer>
+
+<script src="js/app.js"></script>
+<script src="js/banking.js"></script>
+</body>
+</html>
