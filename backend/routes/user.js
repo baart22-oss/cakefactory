@@ -27,7 +27,17 @@ router.get('/profile', authMiddleware, async (req, res) => {
       [req.user.userId]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
-    res.json({ user: rows[0] });
+
+    const { rows: depositRows } = await pool.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total_deposits
+       FROM transactions WHERE user_id = $1 AND type = 'deposit' AND status = 'approved'`,
+      [req.user.userId]
+    );
+
+    const user = rows[0];
+    user.total_deposits = parseFloat(depositRows[0].total_deposits);
+
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load profile' });

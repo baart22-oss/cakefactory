@@ -3,8 +3,9 @@
    ============================================================ */
 
 let allItems = [];
-let currentCakeItems = []; // [{id, name, emoji, price, category, roi_multiplier, quantity}]
+let currentCakeItems = []; // [{id, name, emoji, price, category, quantity}]
 let walletBalance = 0;
+let totalDeposits = 0;
 
 const LAYER_COLORS = {
   layer: ['#f5deb3','#d4a0a0','#c97a4a','#5c3317','#ffe4b5','#ffa07a','#cd853f'],
@@ -25,6 +26,7 @@ async function loadProfile() {
   try {
     const data = await apiCall('/api/user/profile', 'GET', null, token);
     walletBalance = parseFloat(data.user.wallet);
+    totalDeposits = parseFloat(data.user.total_deposits || 0);
     document.getElementById('walletDisplay').textContent = formatCurrency(walletBalance);
     document.getElementById('navWallet').textContent = formatCurrency(walletBalance);
     document.getElementById('navUsername').textContent = '👤 ' + data.user.username;
@@ -62,9 +64,6 @@ function renderShop() {
           <div class="item-info">
             <div class="item-name">${item.name}</div>
             <div class="item-price">${formatCurrency(item.price)}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="item-roi">×${parseFloat(item.roi_multiplier).toFixed(2)}</div>
           </div>
         </button>
       `;
@@ -169,13 +168,11 @@ function updateCakeSummary() {
   }
 
   let totalCost = 0;
-  let earningsMultiplier = 1;
 
   const rows = currentCakeItems.map((item, idx) => {
     const qty = item.quantity || 1;
     const lineTotal = parseFloat(item.price) * qty;
     totalCost += lineTotal;
-    earningsMultiplier *= Math.pow(parseFloat(item.roi_multiplier), qty);
     return `
       <div class="cake-item-row">
         <span class="emoji">${item.emoji}</span>
@@ -188,13 +185,10 @@ function updateCakeSummary() {
 
   container.innerHTML = rows;
 
-  const earnings = totalCost * earningsMultiplier;
-  const profit = earnings - totalCost;
+  const dailyEarnings = totalDeposits * 0.05;
 
   document.getElementById('totalCostDisplay').textContent = formatCurrency(totalCost);
-  document.getElementById('multiplierDisplay').textContent = '×' + earningsMultiplier.toFixed(2);
-  document.getElementById('earningsDisplay').textContent = formatCurrency(earnings);
-  document.getElementById('profitDisplay').textContent = '+' + formatCurrency(profit);
+  document.getElementById('dailyReturnDisplay').textContent = formatCurrency(dailyEarnings);
   totals.style.display = 'block';
 
   // Warn if insufficient balance
@@ -230,7 +224,9 @@ async function completeCake() {
 
     document.getElementById('modalCost').textContent = formatCurrency(data.totalCost);
     document.getElementById('modalEarnings').textContent = formatCurrency(data.earnings);
-    document.getElementById('modalProfit').textContent = '+' + formatCurrency(data.profit) + ' profit';
+    document.getElementById('modalProfit').textContent = data.alreadyEarnedToday
+      ? 'Daily earnings already credited today'
+      : '+' + formatCurrency(data.profit) + ' profit';
     document.getElementById('modalWallet').textContent = formatCurrency(data.wallet);
 
     openModal('earningsModal');
