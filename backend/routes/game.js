@@ -108,7 +108,6 @@ router.post('/complete-cake', authMiddleware, async (req, res) => {
     dbItems.forEach(i => { itemMap[i.id] = i; });
 
     let totalCost = 0;
-    let earningsMultiplier = 1;
     const itemDetails = [];
 
     for (const reqItem of items) {
@@ -116,14 +115,32 @@ router.post('/complete-cake', authMiddleware, async (req, res) => {
       if (!dbItem) continue;
       const qty = reqItem.quantity || 1;
       totalCost += parseFloat(dbItem.price) * qty;
-      earningsMultiplier *= Math.pow(parseFloat(dbItem.roi_multiplier), qty);
       itemDetails.push({ id: dbItem.id, name: dbItem.name, emoji: dbItem.emoji, price: dbItem.price, quantity: qty });
     }
 
-    const earnings = parseFloat((totalCost * earningsMultiplier).toFixed(2));
-    const profit = parseFloat((earnings - totalCost).toFixed(2));
-
     await client.query('BEGIN');
+
+    // Check if user has already earned today
+    const { rows: todayCakes } = await client.query(
+      `SELECT id FROM completed_cakes
+       WHERE user_id = $1 AND earnings > 0 AND created_at >= CURRENT_DATE`,
+      [req.user.userId]
+    );
+    const alreadyEarnedToday = todayCakes.length > 0;
+
+    // Calculate earnings: 5% of total approved deposits (non-compounding), once per day
+    let earnings = 0;
+    if (!alreadyEarnedToday) {
+      const { rows: depositRows } = await client.query(
+        `SELECT COALESCE(SUM(amount), 0) AS total_deposits
+         FROM transactions WHERE user_id = $1 AND type = 'deposit' AND status = 'approved'`,
+        [req.user.userId]
+      );
+      const totalDeposits = parseFloat(depositRows[0].total_deposits);
+      earnings = parseFloat((totalDeposits * 0.05).toFixed(2));
+    }
+
+    const profit = parseFloat((earnings - totalCost).toFixed(2));
 
     const { rows: userRows } = await client.query(
       'SELECT wallet FROM users WHERE id = $1 FOR UPDATE',
@@ -157,7 +174,8 @@ router.post('/complete-cake', authMiddleware, async (req, res) => {
       earnings,
       profit,
       wallet: parseFloat(updatedUser[0].wallet),
-      totalEarned: parseFloat(updatedUser[0].total_earned)
+      totalEarned: parseFloat(updatedUser[0].total_earned),
+      alreadyEarnedToday
     });
   } catch (err) {
     await client.query('ROLLBACK');
