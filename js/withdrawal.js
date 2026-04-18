@@ -2,6 +2,8 @@
    withdrawal.js — Withdrawal page
    ============================================================ */
 
+const WITHDRAWAL_FEE_RATE = 0.10;
+
 let currentWallet = 0;
 let hasBanking = false;
 
@@ -25,6 +27,26 @@ async function loadWithdrawalPage() {
     document.getElementById('navWallet').textContent = formatCurrency(currentWallet);
     document.getElementById('walletBalance').textContent = formatCurrency(currentWallet);
     document.getElementById('wdHint').textContent = `Available: ${formatCurrency(currentWallet)}`;
+
+    // Show fee preview on amount input
+    const wdAmountInput = document.getElementById('wdAmount');
+    const feeRatePct = WITHDRAWAL_FEE_RATE * 100;
+    document.getElementById('feeRateInfo').textContent = `${feeRatePct}%`;
+    document.getElementById('feeLabel').textContent = `${feeRatePct}% Fee`;
+    wdAmountInput.addEventListener('input', () => {
+      const val = parseFloat(wdAmountInput.value);
+      const feePreview = document.getElementById('feePreview');
+      if (val > 0) {
+        const fee = parseFloat((val * WITHDRAWAL_FEE_RATE).toFixed(2));
+        const net = parseFloat((val - fee).toFixed(2));
+        document.getElementById('previewAmount').textContent = formatCurrency(val);
+        document.getElementById('previewFee').textContent = '- ' + formatCurrency(fee);
+        document.getElementById('previewNet').textContent = formatCurrency(net);
+        feePreview.style.display = 'block';
+      } else {
+        feePreview.style.display = 'none';
+      }
+    });
 
     const banking = bankData.banking;
     const summaryEl = document.getElementById('bankingSummary');
@@ -103,6 +125,9 @@ async function submitWithdrawal(e) {
     return;
   }
 
+  const fee = parseFloat((amount * WITHDRAWAL_FEE_RATE).toFixed(2));
+  const net = parseFloat((amount - fee).toFixed(2));
+
   const btn = document.getElementById('wdBtn');
   setLoading(btn, true);
 
@@ -115,7 +140,7 @@ async function submitWithdrawal(e) {
     document.getElementById('navWallet').textContent = formatCurrency(currentWallet);
     document.getElementById('wdHint').textContent = `Available: ${formatCurrency(currentWallet)}`;
 
-    successEl.innerHTML = `✅ Withdrawal of ${formatCurrency(amount)} submitted! Processing within 1-3 business days. <a href="dashboard.html">Dashboard</a>`;
+    successEl.innerHTML = `✅ Withdrawal of ${formatCurrency(amount)} submitted! A ${WITHDRAWAL_FEE_RATE * 100}% fee of ${formatCurrency(fee)} applies — you will receive ${formatCurrency(net)}. Processing within 1-3 business days. <a href="dashboard.html">Dashboard</a>`;
     successEl.classList.remove('hidden');
     document.getElementById('withdrawalForm').reset();
   } catch (err) {

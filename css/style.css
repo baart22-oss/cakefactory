@@ -607,12 +607,27 @@ select.form-control {
   cursor: pointer;
   transition: var(--transition);
   background: var(--bg);
+  width: 100%;
+  text-align: left;
+  font-family: var(--font);
+  font-size: inherit;
+  color: var(--text);
+  outline: none;
 }
 
 .item-card:hover {
   border-color: var(--primary);
   background: rgba(233, 30, 140, 0.04);
   transform: translateX(2px);
+}
+
+.item-card:focus-visible {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.25);
+}
+
+.item-card:active {
+  transform: scale(0.98);
 }
 
 .item-emoji {

@@ -120,9 +120,9 @@ router.post('/verify-transaction', adminAuth, async (req, res) => {
 
       if (user && !user.first_deposit_done) {
         const levels = [
-          { pct: 0.10, level: 1 },
+          { pct: 0.05, level: 1 },
           { pct: 0.05, level: 2 },
-          { pct: 0.02, level: 3 }
+          { pct: 0.05, level: 3 }
         ];
         let currentCode = user.referred_by;
 
