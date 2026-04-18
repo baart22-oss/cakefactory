@@ -3,6 +3,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { pool } = require('./store');
 
+const WITHDRAWAL_FEE_RATE = 0.10;
+
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -57,6 +59,9 @@ router.post('/request', authMiddleware, async (req, res) => {
     const bank = bankRows[0];
     const accountSummary = `${bank.bank_name} | ${bank.account_holder} | ${bank.account_number}`;
 
+    const fee = parseFloat((withdrawAmount * WITHDRAWAL_FEE_RATE).toFixed(2));
+    const net = parseFloat((withdrawAmount - fee).toFixed(2));
+
     // Deduct from wallet immediately (hold)
     await client.query(
       'UPDATE users SET wallet = wallet - $1 WHERE id = $2',
@@ -65,15 +70,17 @@ router.post('/request', authMiddleware, async (req, res) => {
 
     const { rows } = await client.query(
       `INSERT INTO withdrawals (user_id, username, email, amount, fee, net, method, account, status)
-       VALUES ($1, $2, $3, $4, 0, $4, 'EFT', $5, 'pending')
+       VALUES ($1, $2, $3, $4, $5, $6, 'EFT', $7, 'pending')
        RETURNING *`,
-      [user.id, user.username, user.email, withdrawAmount, accountSummary]
+      [user.id, user.username, user.email, withdrawAmount, fee, net, accountSummary]
     );
 
     await client.query('COMMIT');
     res.status(201).json({
       withdrawal: rows[0],
-      message: 'Withdrawal request submitted. Processing within 1-3 business days.'
+      fee,
+      net,
+      message: `Withdrawal request submitted. A ${WITHDRAWAL_FEE_RATE * 100}% fee of ${fee.toFixed(2)} applies. You will receive R${net.toFixed(2)}. Processing within 1-3 business days.`
     });
   } catch (err) {
     await client.query('ROLLBACK');

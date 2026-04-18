@@ -73,8 +73,13 @@
           <div style="font-weight:600;color:var(--dark);margin-bottom:0.4rem;">Processing Information</div>
           <div>• Withdrawals processed within 1-3 business days</div>
           <div>• Minimum withdrawal: R1.00</div>
-          <div>• No fees charged</div>
+          <div>• <strong style="color:var(--warning);"><span id="feeRateInfo">10%</span> withdrawal fee applies</strong></div>
           <div>• Funds held pending approval</div>
+        </div>
+        <div id="feePreview" style="display:none;background:#fff8e1;border-radius:var(--radius-sm);padding:0.75rem 1rem;border:1px solid var(--warning);font-size:0.85rem;margin-bottom:1.25rem;">
+          <div style="display:flex;justify-content:space-between;"><span>Requested Amount</span><span id="previewAmount">R 0.00</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--warning);"><span id="feeLabel">Fee</span><span id="previewFee">- R 0.00</span></div>
+          <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--success);border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.5rem;"><span>You Receive</span><span id="previewNet">R 0.00</span></div>
         </div>
         <button type="submit" class="btn btn-primary btn-block btn-lg" id="wdBtn">Request Withdrawal</button>
       </form>

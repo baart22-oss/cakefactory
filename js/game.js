@@ -57,7 +57,7 @@ function renderShop() {
     html += `<div class="item-category-title">${catLabels[cat]}</div>`;
     items.forEach(item => {
       html += `
-        <div class="item-card" onclick="addItemToCake(${item.id})" title="${item.description}">
+        <button class="item-card" type="button" onclick="addItemToCake(${item.id})" title="${item.description}">
           <span class="item-emoji">${item.emoji}</span>
           <div class="item-info">
             <div class="item-name">${item.name}</div>
@@ -66,7 +66,7 @@ function renderShop() {
           <div style="text-align:right;">
             <div class="item-roi">×${parseFloat(item.roi_multiplier).toFixed(2)}</div>
           </div>
-        </div>
+        </button>
       `;
     });
   }
