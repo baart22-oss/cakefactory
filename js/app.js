@@ -2,7 +2,24 @@
    CakeFactory - Shared JS Utilities
    ============================================================ */
 
-const API_BASE = 'https://cakefactory-backend.onrender.com';
+const API_BASE = (() => {
+  // 1. Explicit override: set window.__API_BASE__ in a <script> before this file loads.
+  if (typeof window.__API_BASE__ === 'string' && window.__API_BASE__) {
+    return window.__API_BASE__.replace(/\/$/, '');
+  }
+  // 2. Meta tag override: <meta name="api-base" content="https://your-backend.example.com">
+  const meta = document.querySelector('meta[name="api-base"]');
+  if (meta && meta.content) {
+    return meta.content.replace(/\/$/, '');
+  }
+  // 3. Same-origin for local development (frontend served from the backend process).
+  const { hostname } = window.location;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return window.location.origin;
+  }
+  // 4. Production default — the live Render backend.
+  return 'https://cakefactory-jn8f.onrender.com';
+})();
 
 async function apiCall(endpoint, method = 'GET', body = null, token = null) {
   const headers = { 'Content-Type': 'application/json' };
